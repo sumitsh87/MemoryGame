@@ -5,7 +5,7 @@ import java.util.ArrayList;
 class Constants 
 {
 	public static String IMAGE_TAG = "India";
-	public static int gridSize = 12;
+	public static int gridSize = 9;
 	public static int imageSizeInDP = 80;
 	public static int imageDownloadCount = 0;
 	public static int taskFinishCount = 0;
