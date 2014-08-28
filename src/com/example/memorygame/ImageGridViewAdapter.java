@@ -28,7 +28,7 @@ public class ImageGridViewAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
-		return Constants.totalImagesRendered;
+		return Constants.gridSize;
 	}
 
 	@Override
@@ -44,14 +44,14 @@ public class ImageGridViewAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ImageView imageView = new ImageView(activity.getBaseContext());
+		//Show blank image, if 15 sec timeout is over (areImagesHidden is true) and image at this position not yet revealed.
 		if(areImagesHidden && !revealedImagePosList.contains(position))
 			imageView.setImageResource(R.drawable.no_photo);
 		else 
 			imageView.setImageBitmap(memoryCache.get(position));
 		imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-		//set Size of each image
-		
+		//set dimensions of each image
 		Resources resource = activity.getResources();
 		int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, Constants.imageSizeInDP, resource.getDisplayMetrics());
 		imageView.setLayoutParams(new GridView.LayoutParams(px, px));

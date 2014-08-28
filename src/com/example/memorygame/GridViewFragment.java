@@ -82,18 +82,20 @@ public class GridViewFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		mainActivity =getActivity();
-
+ 
+		//If savedInsatnceState is null, i.e. Fragment not being re-used, then only initilialise these UI Elements 
 		if(root==null)
 		{
-			root = (ViewGroup) inflater.inflate(
-					R.layout.grid_view_fragment, null);
+			root = (ViewGroup) inflater.inflate(R.layout.grid_view_fragment, null);
 			movesCountView = (TextView)root.findViewById(R.id.movesCount);
 			timerValueView = (TextView)root.findViewById(R.id.timerValue);
 			gridView = (GridView)root.findViewById(R.id.gridView);
 			gridView.setOnItemClickListener(itemClickListener);
 
+			//Generate a Random Number List by shuffling
 			genRandomNumberList();
 
+			//Download image list from FLickr Asynchronously
 			Thread thread = new Thread()
 			{
 				@Override
@@ -127,6 +129,7 @@ public class GridViewFragment extends Fragment {
 			progressDialog.dismiss();
 		isDownloadTaskRunning = false;
 		areImagesHidden=false;
+		//create a new adapter to show all the images in a grid
 		imageGridViewAdapter = new ImageGridViewAdapter(mainActivity, areImagesHidden,memoryCache, revealedImagePosList);
 		gridView.setAdapter(imageGridViewAdapter);
 		Toast.makeText(mainActivity,"Memorize the images, you have 15 seconds", Toast.LENGTH_LONG).show();
@@ -190,6 +193,8 @@ public class GridViewFragment extends Fragment {
 							Toast.makeText(mainActivity,"Time is up!! Now identify the image location", Toast.LENGTH_LONG).show();
 							timer.cancel();
 							revealNewImage();
+							
+							//Lets hide all the images
 							imageGridViewAdapter.areImagesHidden = true;
 							imageGridViewAdapter.notifyDataSetChanged();
 							gridView.setAdapter(imageGridViewAdapter);
@@ -224,7 +229,7 @@ public class GridViewFragment extends Fragment {
 				movesCount++;
 				movesCountView.setText(String.valueOf(movesCount));
 
-				if (currentRandomNumber == position && successCount <9)
+				if (currentRandomNumber == position && successCount <Constants.gridSize)
 				{
 					ImageView imageView = (ImageView) view;		
 					imageView.setImageBitmap(memoryCache.get(position));
@@ -233,7 +238,7 @@ public class GridViewFragment extends Fragment {
 					Log.v("test", "position clicked : "+position);
 					revealNewImage();
 				}
-				else if (successCount==9)
+				else if (successCount==Constants.gridSize)
 				{
 					showSuccessAlert();
 				}
@@ -279,9 +284,9 @@ public class GridViewFragment extends Fragment {
 	{
 		//prepare for random values
 		list = new ArrayList<Integer>();
-		for(int i=0;i<9;i++)
+		for(int i=0;i<Constants.gridSize;i++)
 		{
-			list.add(i);  // list contains: [0,1,2,3,4,5,6,7,8]
+			list.add(i);  
 		}
 		Collections.shuffle(list);	
 
@@ -295,7 +300,7 @@ public class GridViewFragment extends Fragment {
 			imageGridViewAdapter = new ImageGridViewAdapter(mainActivity, areImagesHidden,memoryCache, revealedImagePosList);
 			isDownloadTaskRunning = true;
 			showProgressBar();
-			for (int index=0; index<9; index++)
+			for (int index=0; index<Constants.gridSize; index++)
 			{
 				try {
 					JSONObject mediaObj = (JSONObject) imageItemsList.getJSONObject(index).get("media");
@@ -323,8 +328,7 @@ public class GridViewFragment extends Fragment {
 
 	@Override
 	public void onDetach() {
-		// All dialogs should be closed before leaving the activity in order to avoid
-		// the: Activity has leaked window com.android.internal.policy... exception
+	
 		if (progressDialog != null && progressDialog.isShowing()) {
 			progressDialog.dismiss();
 		}
@@ -334,12 +338,14 @@ public class GridViewFragment extends Fragment {
 	void initialiseElements()
 	{
 			memoryCache=new MemoryCache(mainActivity);
+			//revealedImagePosList - stores position of images already revealed/identified. 
+			//Useful for restoring state after orientation change
 			revealedImagePosList=new ArrayList<Integer>();
 	}
 	void resetElements()
 	{
-		memoryCache.clear();
-		revealedImagePosList.clear();
+		memoryCache=null;
+		revealedImagePosList=null;
 		Constants.imageDownloadCount = 0;
 		Constants.taskFinishCount = 0;
 		
