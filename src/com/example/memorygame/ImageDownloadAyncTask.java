@@ -15,13 +15,15 @@ class ImageDownloadAsyncTask extends AsyncTask<String, Integer, List> {
 	private MainActivity mainActivity;
 	private Bitmap image;
 	private GridViewFragment fragment;
+	MemoryCache memoryCache;
 
 
-	public ImageDownloadAsyncTask (GridViewFragment fragment, Context context, String imageLink, ImageGridViewAdapter gridAdapter)
+	public ImageDownloadAsyncTask (GridViewFragment fragment, Context context, String imageLink, ImageGridViewAdapter gridAdapter, MemoryCache memoryCache)
 	{
 		this.imageLink = imageLink;
 		this.mainActivity = (MainActivity) context;
 		this.fragment = fragment;
+		this.memoryCache = memoryCache;
 
 	}
 
@@ -45,7 +47,7 @@ class ImageDownloadAsyncTask extends AsyncTask<String, Integer, List> {
 			e.printStackTrace();
 			return null;
 		}
-		Constants.memoryCache.put(Constants.imageDownloadCount, image);
+		memoryCache.put(Constants.imageDownloadCount, image);
 		Constants.imageDownloadCount++;
 
 		return null;
@@ -53,16 +55,10 @@ class ImageDownloadAsyncTask extends AsyncTask<String, Integer, List> {
 
 	@Override
 	protected void onPostExecute(List s) {
-		//		progressDialog.dismiss();
-		//        imageGridViewAdapter = new ImageGridViewAdapter(MainActivity.this);
-		//        gridView.setAdapter(imageGridViewAdapter);
+
 		Constants.taskFinishCount++;
 		if (Constants.taskFinishCount>=9)
-		{
 			fragment.downloadTaskFinished();
-			Log.v("image", "cached images: "+Constants.memoryCache);
-
-		}
 		super.onPostExecute(s);
 	}
 

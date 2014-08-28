@@ -14,7 +14,6 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		initialiseElements();
 		
 		//Using Fragment inorder to avoid async-task's restart when orientation is changed
 		FragmentManager fragmentManager = getFragmentManager();
@@ -26,14 +25,6 @@ public class MainActivity extends Activity {
 			fragmentTransaction.add(R.id.gridView, gridViewFragment, "gridViewFragment").commit();
 		}
 
-	}
-	void initialiseElements()
-	{
-		if(Constants.memoryCache==null)
-			Constants.memoryCache=new MemoryCache(this);
-		
-		if(Constants.revealedImagePosList==null)
-			Constants.revealedImagePosList=new ArrayList<Integer>();
 	}
 
 	@Override

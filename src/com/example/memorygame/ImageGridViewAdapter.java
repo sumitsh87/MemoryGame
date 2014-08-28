@@ -1,5 +1,7 @@
 package com.example.memorygame;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.res.Resources;
 import android.util.TypedValue;
@@ -13,21 +15,25 @@ public class ImageGridViewAdapter extends BaseAdapter {
 
 	private Activity activity;
 	public boolean areImagesHidden;
-
-	public ImageGridViewAdapter(Activity activity, boolean areImagesHidden)
+	MemoryCache memoryCache;
+	ArrayList<Integer> revealedImagePosList;
+	
+	public ImageGridViewAdapter(Activity activity, boolean areImagesHidden, MemoryCache memoryCache, ArrayList<Integer> revealedImagePosList)
 	{
 		this.activity = activity;
 		this.areImagesHidden = areImagesHidden;
+		this.memoryCache = memoryCache;
+		this.revealedImagePosList = revealedImagePosList;
 	}
 
 	@Override
 	public int getCount() {
-		return 9;
+		return Constants.totalImagesRendered;
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return Constants.memoryCache.get(position);
+		return memoryCache.get(position);
 	}
 
 	@Override
@@ -38,16 +44,16 @@ public class ImageGridViewAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ImageView imageView = new ImageView(activity.getBaseContext());
-		if(areImagesHidden && !Constants.revealedImagePosList.contains(position))
+		if(areImagesHidden && !revealedImagePosList.contains(position))
 			imageView.setImageResource(R.drawable.no_photo);
 		else 
-			imageView.setImageBitmap(Constants.memoryCache.get(position));
+			imageView.setImageBitmap(memoryCache.get(position));
 		imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
 		//set Size of each image
-		int imageSizeInDP = 80;
+		
 		Resources resource = activity.getResources();
-		int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, imageSizeInDP, resource.getDisplayMetrics());
+		int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, Constants.imageSizeInDP, resource.getDisplayMetrics());
 		imageView.setLayoutParams(new GridView.LayoutParams(px, px));
 		return imageView;
 	}

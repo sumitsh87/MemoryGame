@@ -63,19 +63,19 @@ public class GridViewFragment extends Fragment {
 	int timeCountDown;
 	boolean isDownloadTaskRunning = false;
 	ProgressDialog progressDialog;
-
+	MemoryCache memoryCache;
+	ArrayList<Integer> revealedImagePosList;
 
 	public static Fragment newInstance(Context context) {
 		GridViewFragment gridViewFragment = new GridViewFragment();
 		return gridViewFragment;
 	}
 
-
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setRetainInstance(true);
+		initialiseElements();
 	}
 
 	@Override
@@ -127,7 +127,7 @@ public class GridViewFragment extends Fragment {
 			progressDialog.dismiss();
 		isDownloadTaskRunning = false;
 		areImagesHidden=false;
-		imageGridViewAdapter = new ImageGridViewAdapter(mainActivity, areImagesHidden);
+		imageGridViewAdapter = new ImageGridViewAdapter(mainActivity, areImagesHidden,memoryCache, revealedImagePosList);
 		gridView.setAdapter(imageGridViewAdapter);
 		Toast.makeText(mainActivity,"Memorize the images, you have 15 seconds", Toast.LENGTH_LONG).show();
 		checkCallTimeout();
@@ -209,7 +209,7 @@ public class GridViewFragment extends Fragment {
 
 		Log.v("test", "current random number:  "+currentRandomNumber);
 		singleImageView = (ImageView)root.findViewById(R.id.imageOption);
-		singleImageView.setImageBitmap(Constants.memoryCache.get(currentRandomNumber));
+		singleImageView.setImageBitmap(memoryCache.get(currentRandomNumber));
 		singleImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 		singleImageView.setVisibility(View.VISIBLE);
 	}
@@ -222,12 +222,14 @@ public class GridViewFragment extends Fragment {
 			if(allotedTimeUp)
 			{
 				movesCount++;
+				movesCountView.setText(String.valueOf(movesCount));
+
 				if (currentRandomNumber == position && successCount <9)
 				{
 					ImageView imageView = (ImageView) view;		
-					imageView.setImageBitmap(Constants.memoryCache.get(position));
+					imageView.setImageBitmap(memoryCache.get(position));
 					//add the position to the list to save  in case there is a configuration change
-					Constants.revealedImagePosList.add(currentRandomNumber);	
+					revealedImagePosList.add(currentRandomNumber);	
 					Log.v("test", "position clicked : "+position);
 					revealNewImage();
 				}
@@ -235,10 +237,7 @@ public class GridViewFragment extends Fragment {
 				{
 					showSuccessAlert();
 				}
-				else 
-				{ 
-					movesCountView.setText(String.valueOf(movesCount));
-				}
+		
 			}
 		}
 
@@ -254,7 +253,7 @@ public class GridViewFragment extends Fragment {
 		.setCancelable(false)
 		.setPositiveButton("Play Again",new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog,int id) {
-				Constants.resetStaticVariables();
+				resetElements();
 				Intent intent = new Intent(mainActivity, MainActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 				startActivity(intent);
@@ -263,7 +262,7 @@ public class GridViewFragment extends Fragment {
 		})
 		.setNegativeButton("Exit",new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog,int id) {
-				Constants.resetStaticVariables();
+				resetElements();
 				mainActivity.finish();
 			}
 		});
@@ -293,7 +292,7 @@ public class GridViewFragment extends Fragment {
 		public void handleMessage(Message msg) 
 		{
 			areImagesHidden =false;
-			imageGridViewAdapter = new ImageGridViewAdapter(mainActivity, areImagesHidden);
+			imageGridViewAdapter = new ImageGridViewAdapter(mainActivity, areImagesHidden,memoryCache, revealedImagePosList);
 			isDownloadTaskRunning = true;
 			showProgressBar();
 			for (int index=0; index<9; index++)
@@ -307,7 +306,7 @@ public class GridViewFragment extends Fragment {
 					e.printStackTrace();
 				}
 				Log.v("image", "image Link : "+ imageLink);
-				ImageDownloadAsyncTask imageDownloadTask = new ImageDownloadAsyncTask (GridViewFragment.this, mainActivity , imageLink, imageGridViewAdapter );
+				ImageDownloadAsyncTask imageDownloadTask = new ImageDownloadAsyncTask (GridViewFragment.this, mainActivity , imageLink, imageGridViewAdapter, memoryCache );
 				imageDownloadTask.execute(ImageDownloadAsyncTask.THREAD_POOL_EXECUTOR, "ImageDownloader");
 			}
 
@@ -330,6 +329,20 @@ public class GridViewFragment extends Fragment {
 			progressDialog.dismiss();
 		}
 		super.onDetach();
+	}
+
+	void initialiseElements()
+	{
+			memoryCache=new MemoryCache(mainActivity);
+			revealedImagePosList=new ArrayList<Integer>();
+	}
+	void resetElements()
+	{
+		memoryCache.clear();
+		revealedImagePosList.clear();
+		Constants.imageDownloadCount = 0;
+		Constants.taskFinishCount = 0;
+		
 	}
 
 }
