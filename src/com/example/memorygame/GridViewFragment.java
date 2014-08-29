@@ -83,7 +83,7 @@ public class GridViewFragment extends Fragment {
 			Bundle savedInstanceState) {
 		mainActivity =getActivity();
  
-		//If savedInsatnceState is null, i.e. Fragment not being re-used, then only initilialise these UI Elements 
+		//If Fragment is not being re-used, then only initilialise these UI Elements 
 		if(root==null)
 		{
 			root = (ViewGroup) inflater.inflate(R.layout.grid_view_fragment, null);
